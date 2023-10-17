@@ -13,10 +13,13 @@ router.get('/', (req, res) => {
     res.status(201).send('GET: /post')
 })
 
-router.post('/join', (req, res) => {
+router.post('/join', (
+    req,
+    res
+) => {
     console.log("request : ", req.body)
 
-    res.json('ok')
+    return res.json('ok')
     // console.log("request JSON : ", JSON.stringify(bodyParser(req.body)))
 })
 

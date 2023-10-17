@@ -1,9 +1,15 @@
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
+export class NotAuthorizedException extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "NotAuthorizedException";
+    }
+}
 
 const permitUrl = [
     '/login',
-    '/join',
+    '/members/join',
     '/email-check'
 ]
 dotenv.config()
@@ -13,7 +19,12 @@ export const auth = (req, res, next) => {
         if (permitUrl.includes(req.url)) return next()
 
         const {authorization} = req.headers
-        if (!authorization) return;
+        if (!authorization) {
+            return res.status(403).json({
+                code: 403,
+                message: "권한이 없습니다. 로그인을 해주세요.",
+            });
+        }
 
         const key = process.env.SECRET_KEY
         const token = authorization.substring(7, authorization.length)

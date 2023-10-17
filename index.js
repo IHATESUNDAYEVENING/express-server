@@ -28,43 +28,52 @@ app.listen(PORT, () => {
     console.log('-------------------------------------')
 })
 
-app.post('/login', (req, res, next) => {
-    const {email, password} = req.body
-    if (!email || !password) return;
+app.post('/login', (
+    req,
+    res, next
+) => {
+    try {
+        const {email, password} = req.body
+        if (!email || !password) return;
 
-    const key = process.env.SECRET_KEY
-    let token = null
+        const key = process.env.SECRET_KEY
+        let accessToken = null
 
-    db.query(
-        `
-            SELECT *
-            FROM member
-            WHERE email = '${email}'
-              and password = '${password}'
-        `,
-        (err, results) => {
+        db.query(
+            `
+                SELECT *
+                FROM member
+                WHERE email = '${email}'
+                  and password = '${password}'
+            `,
+            (err, results) => {
 
-            if (err) {
-                console.error('Error querying the database:', err);
-                res.status(500).json({error: 'Database error'});
-                return;
-            }
-
-            token = jwt.sign(
-                {
-                    type: 'JWT',
-                    role: results[0].role === 1 ? 'ROLE_ADMIN' : "ROLE_USER"
-                },
-                key,
-                {
-                    expiresIn: "5m" //5분후 만료
+                if (err) {
+                    console.error('Error querying the database:', err);
+                    res.status(500).json({error: 'Database error'});
+                    return;
                 }
-            )
-            return res.status(200).json({
-                code: 200, message: 'token is created',
-                token: token
-            })
-        }
-    )
+
+                accessToken = jwt.sign(
+                    {
+                        type: 'JWT',
+                        role: results[0].role === 1 ? 'ROLE_ADMIN' : "ROLE_USER"
+                    },
+                    key,
+                    {
+                        expiresIn: "5m" //5분후 만료
+                    }
+                )
+                return res.status(200).json({
+                    code: 200, message: 'token is created',
+                    accessToken: accessToken
+                })
+            }
+        )
+    } catch (e) {
+        throw e
+    } finally {
+    }
+
 })
 
